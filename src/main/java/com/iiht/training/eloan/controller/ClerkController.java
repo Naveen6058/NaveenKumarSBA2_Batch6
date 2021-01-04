@@ -2,6 +2,8 @@ package com.iiht.training.eloan.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import com.iiht.training.eloan.dto.exception.ExceptionResponse;
 import com.iiht.training.eloan.exception.AlreadyProcessedException;
 import com.iiht.training.eloan.exception.ClerkNotFoundException;
 import com.iiht.training.eloan.exception.InvalidDataException;
+import com.iiht.training.eloan.exception.LoanNotFoundException;
 import com.iiht.training.eloan.service.ClerkService;
 
 @RestController
@@ -42,7 +45,7 @@ public class ClerkController {
 	@PostMapping("/process/{clerkId}/{loanAppId}")
 	public ResponseEntity<ProcessingDto> processLoan(@PathVariable Long clerkId,
 													 @PathVariable Long loanAppId,
-													 @RequestBody ProcessingDto processingDto, BindingResult result) {
+													 @Valid @RequestBody ProcessingDto processingDto, BindingResult result) {
 		
 		
 		if(result.hasErrors()) {
@@ -77,6 +80,17 @@ public class ClerkController {
 									  HttpStatus.BAD_REQUEST.value());
 		ResponseEntity<ExceptionResponse> response =
 				new ResponseEntity<ExceptionResponse>(exception, HttpStatus.BAD_REQUEST);
+		return response;
+	}
+	
+	@ExceptionHandler(LoanNotFoundException.class)
+	public ResponseEntity<ExceptionResponse> handler(LoanNotFoundException ex){
+		ExceptionResponse exception = 
+				new ExceptionResponse(ex.getMessage(),
+									  System.currentTimeMillis(),
+									  HttpStatus.NOT_FOUND.value());
+		ResponseEntity<ExceptionResponse> response =
+				new ResponseEntity<ExceptionResponse>(exception, HttpStatus.NOT_FOUND);
 		return response;
 	}
 }

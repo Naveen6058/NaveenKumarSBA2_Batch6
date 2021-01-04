@@ -1,7 +1,14 @@
 package com.iiht.training.eloan.dto;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 public class SanctionDto {
+	@NotNull
+	@Min(value = 1)
 	private Double loanAmountSanctioned;
+	@NotNull
+	@Min(value = 1)
 	private Double termOfLoan;
 	private String paymentStartDate;
 	public Double getLoanAmountSanctioned() {

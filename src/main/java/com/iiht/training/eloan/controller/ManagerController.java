@@ -23,6 +23,7 @@ import com.iiht.training.eloan.dto.SanctionOutputDto;
 import com.iiht.training.eloan.dto.exception.ExceptionResponse;
 import com.iiht.training.eloan.exception.AlreadyFinalizedException;
 import com.iiht.training.eloan.exception.InvalidDataException;
+import com.iiht.training.eloan.exception.LoanNotFoundException;
 import com.iiht.training.eloan.exception.ManagerNotFoundException;
 import com.iiht.training.eloan.service.ManagerService;
 
@@ -88,6 +89,27 @@ public class ManagerController {
 									  HttpStatus.BAD_REQUEST.value());
 		ResponseEntity<ExceptionResponse> response =
 				new ResponseEntity<ExceptionResponse>(exception, HttpStatus.BAD_REQUEST);
+		return response;
+	}
+	@ExceptionHandler(InvalidDataException.class)
+	public ResponseEntity<ExceptionResponse> handler(InvalidDataException ex){
+		ExceptionResponse exception = 
+				new ExceptionResponse(ex.getMessage(),
+									  System.currentTimeMillis(),
+									  HttpStatus.BAD_REQUEST.value());
+		ResponseEntity<ExceptionResponse> response =
+				new ResponseEntity<ExceptionResponse>(exception, HttpStatus.BAD_REQUEST);
+		return response;
+	}
+	
+	@ExceptionHandler(LoanNotFoundException.class)
+	public ResponseEntity<ExceptionResponse> handler(LoanNotFoundException ex){
+		ExceptionResponse exception = 
+				new ExceptionResponse(ex.getMessage(),
+									  System.currentTimeMillis(),
+									  HttpStatus.NOT_FOUND.value());
+		ResponseEntity<ExceptionResponse> response =
+				new ResponseEntity<ExceptionResponse>(exception, HttpStatus.NOT_FOUND);
 		return response;
 	}
 }

@@ -2,9 +2,12 @@ package com.iiht.training.eloan.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +21,7 @@ import com.iiht.training.eloan.dto.LoanOutputDto;
 import com.iiht.training.eloan.dto.UserDto;
 import com.iiht.training.eloan.dto.exception.ExceptionResponse;
 import com.iiht.training.eloan.exception.CustomerNotFoundException;
+import com.iiht.training.eloan.exception.InvalidDataException;
 import com.iiht.training.eloan.service.CustomerService;
 
 @RestController
@@ -28,8 +32,10 @@ public class CustomerController {
 	private CustomerService customerService;
 	
 	@PostMapping("/register")
-	public ResponseEntity<UserDto> register(@RequestBody UserDto userDto){
-
+	public ResponseEntity<UserDto> register(@Valid @RequestBody UserDto userDto, BindingResult result){
+		if(result.hasErrors()) {
+			throw new InvalidDataException("Invalid data format!");
+		}
 		UserDto employeeOutputDto =  this.customerService.register(userDto);
 		ResponseEntity<UserDto> response =
 				new ResponseEntity<UserDto>(employeeOutputDto, HttpStatus.OK);
@@ -39,7 +45,10 @@ public class CustomerController {
 	
 	@PostMapping("/apply-loan/{customerId}")
 	public ResponseEntity<LoanOutputDto> applyLoan(@PathVariable Long customerId,
-												 @RequestBody LoanDto loanDto){
+			@Valid @RequestBody LoanDto loanDto, BindingResult result){
+		if(result.hasErrors()) {
+			throw new InvalidDataException("Invalid data Amount or Loan Name!");
+		}
 		LoanOutputDto loanOutDto =  this.customerService.applyLoan(customerId, loanDto);
 		ResponseEntity<LoanOutputDto> response =
 				new ResponseEntity<LoanOutputDto>(loanOutDto, HttpStatus.OK);
@@ -74,6 +83,16 @@ public class CustomerController {
 									  HttpStatus.NOT_FOUND.value());
 		ResponseEntity<ExceptionResponse> response =
 				new ResponseEntity<ExceptionResponse>(exception, HttpStatus.NOT_FOUND);
+		return response;
+	}
+	@ExceptionHandler(InvalidDataException.class)
+	public ResponseEntity<ExceptionResponse> handler(InvalidDataException ex){
+		ExceptionResponse exception = 
+				new ExceptionResponse(ex.getMessage(),
+									  System.currentTimeMillis(),
+									  HttpStatus.BAD_REQUEST.value());
+		ResponseEntity<ExceptionResponse> response =
+				new ResponseEntity<ExceptionResponse>(exception, HttpStatus.BAD_REQUEST);
 		return response;
 	}
 }
